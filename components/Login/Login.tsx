@@ -20,6 +20,8 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch } from 'react-redux';
 import Loading from '../UI/Loading';
 import { getProcessList } from './api';
+import { LoginFormData } from './types';
+import { ApiError } from '../commontypes/apiTypes';
 
 const defaultLoginFormValue = {
     // username: 'test', // Set the dummy username
@@ -73,8 +75,9 @@ export default function Login() {
         defaultValues: defaultLoginFormValue,
     });
 
-    const onSubmit = useCallback(async (formData: any) => {
+    const onSubmit = useCallback(async (formData: LoginFormData) => {
         try {
+            console.log(formData, '-formData==');
             const url = `${formData.processUrl}/api/login`;
 
             setIsLoading(true);
@@ -96,7 +99,12 @@ export default function Login() {
 
             let currentLoggedinSlotData = data?.data?._loginDetails[0] || [];
             currentLoggedinSlotData.slot = formData.slot;
+
+            console.log(currentLoggedinSlotData, 'currentLoggedinSlotData');
+
             const processData = data?.data?._processData[0] || [];
+
+            console.log(processData, '---');
 
             dispatch(
                 setCurrentLoggedInProcessData({
@@ -106,7 +114,7 @@ export default function Login() {
             );
 
             router.replace('/tabs/scan');
-        } catch (error) {
+        } catch (error: any) {
             Alert.alert('Error', error?.message || 'Not able to login', [
                 {
                     text: 'OK',
@@ -362,7 +370,7 @@ export default function Login() {
                                             <Picker.Item
                                                 key={idx}
                                                 label={`(Slot-${_el.ca_batch_slot}) ${_el.ca_batch_time}`}
-                                                value={_el.ca_batch_slot}
+                                                value={_el.ca_batch_time}
                                                 style={{}}
                                             />
                                         );

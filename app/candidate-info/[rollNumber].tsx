@@ -5,7 +5,7 @@ import * as FileSystem from 'expo-file-system';
 import { RootState } from '@/components/store/store';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 import CandidateProfilePhoto from '@/components/CandidateProfilePhoto';
 import CandidateSignature from '@/components/CandidateSignature';
@@ -181,6 +181,7 @@ const CandidateInfo = () => {
 
             const { ca_roll_number, id, ca_reg_id } = hallticket;
 
+            console.log(hallticket, '-hallticket');
             sendData.set('rollNo', ca_roll_number);
             sendData.set('f_id', id);
             sendData.set('r_id', ca_reg_id);
@@ -205,6 +206,7 @@ const CandidateInfo = () => {
 
             setJustApproved(true);
         } catch (err) {
+            console.log(err, '-err==========');
             Alert.alert('Info', err?.message || 'Unable to approve candidate, try again later', [
                 {
                     text: 'ok',
@@ -227,11 +229,14 @@ const CandidateInfo = () => {
 
             const _resp = await fetch(url);
             const jsonData = await _resp.json();
+
+            console.log(jsonData, '-json');
+
             if (!_resp.ok) {
                 throw new Error(jsonData?.errMsg || 'No candidate found1');
             }
 
-            if (authSlice?.currentLoggedinSlotData.slot != jsonData?.data?.slot?.slot || 0) {
+            if (authSlice?.currentLoggedinSlotData.slot != jsonData?.data?.slot?.time || 0) {
                 throw new Error('No candidate found2');
             } else {
                 setCandidateAllData(jsonData?.data || []);
@@ -250,6 +255,13 @@ const CandidateInfo = () => {
         }
     };
 
+    console.log(
+        `${s3BucketUrl}/${`apmc-atpadi/qr-scan-app-captured/${encodeURIComponent(
+            hallticket?.ca_approved_photo
+        )}`}`,
+        '========='
+    );
+
     if (isLoading) {
         return <Loading />;
     }
@@ -263,22 +275,13 @@ const CandidateInfo = () => {
                 paddingBottom: inset.bottom,
             }}>
             {/* <View style={styles.container}> */}
-            {isCameraOpen && (
-                <CameraView style={styles.fullScreenCamera} ref={cameraRef}>
-                    <View style={styles.buttonContainer}>
-                        <TouchableOpacity
-                            style={[styles.snapButton, styles.buttonPrimary]}
-                            onPress={handleTakePicture}>
-                            <Text style={[styles.text, styles.scannerButtonText]}>Take Photo</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.closeButton, styles.buttonDanger]}
-                            onPress={closeCamera}>
-                            <Text style={[styles.text, styles.scannerButtonText]}>Close</Text>
-                        </TouchableOpacity>
-                    </View>
-                </CameraView>
-            )}
+
+            <CapturePhoto
+                isCameraOpen={isCameraOpen}
+                cameraRef={cameraRef}
+                handleTakePicture={handleTakePicture}
+                closeCamera={closeCamera}
+            />
 
             {!isCameraOpen && (
                 <>
@@ -304,7 +307,9 @@ const CandidateInfo = () => {
                                                 // uri: isPictureTaken ? photoUri : captureImagePlaceholder,
                                                 uri:
                                                     photoUri ||
-                                                    `${s3BucketUrl}/${hallticket?.ca_approved_photo}`,
+                                                    `${s3BucketUrl}/${encodeURIComponent(
+                                                        `apmc-atpadi/qr-scan-app-captured/${hallticket?.ca_approved_photo}`
+                                                    )}`,
                                             }}
                                         />
                                     ) : (
@@ -465,5 +470,42 @@ const DetailRow = React.memo(({ label, value }: { label: string; value: string |
         <Text style={styles.detailValue}>{value}</Text>
     </View>
 ));
+
+const CapturePhoto = React.memo(
+    ({
+        isCameraOpen,
+        cameraRef,
+        handleTakePicture,
+        closeCamera,
+    }: {
+        isCameraOpen: boolean;
+        cameraRef: any;
+        handleTakePicture: () => {};
+        closeCamera: () => void;
+    }) => {
+        return (
+            <>
+                {isCameraOpen && (
+                    <CameraView style={styles.fullScreenCamera} ref={cameraRef}>
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity
+                                style={[styles.snapButton, styles.buttonPrimary]}
+                                onPress={handleTakePicture}>
+                                <Text style={[styles.text, styles.scannerButtonText]}>
+                                    Take Photo
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.closeButton, styles.buttonDanger]}
+                                onPress={closeCamera}>
+                                <Text style={[styles.text, styles.scannerButtonText]}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </CameraView>
+                )}
+            </>
+        );
+    }
+);
 
 export default CandidateInfo;

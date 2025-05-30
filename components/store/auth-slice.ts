@@ -34,13 +34,13 @@ const initialState: AuthSliceInterface = {
 // const initialState: AuthSliceInterface = {
 //     isAuth: true,
 //     currentLoggedInProcessData: {
-//         p_form_filling_site: 'https://101.apmcmangrulpir.in',
+//         p_form_filling_site: 'https://apmc101.apmcatpadi.in',
 //     },
 //     currentLoggedinSlotData: {
 //         // This is current logged in user details (i.e. slot)
 //         id: 0,
 //         password: 'test',
-//         processUrl: 'https://101.apmcmangrulpir.in',
+//         processUrl: 'https://apmc101.apmcatpadi.in',
 //         roll: 'BIOMETRIC',
 //         slot: '2',
 //         user_name: 'test',
