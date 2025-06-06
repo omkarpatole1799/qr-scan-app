@@ -195,6 +195,7 @@ const CandidateInfo = () => {
             sendData.set('candidatePhoto', base64Data);
 
             let url = `${processData.p_form_filling_site}/api/save-approval-details`;
+            console.log(url);
             const _resp = await fetch(url, {
                 method: 'POST',
                 body: sendData,
@@ -227,6 +228,8 @@ const CandidateInfo = () => {
 
             const url = `${authSlice.currentLoggedInProcessData.p_form_filling_site}/api/get-ht-details-by-roll-no?roll_no=${rollNumber}`;
 
+            console.log({ url });
+
             const _resp = await fetch(url);
             const jsonData = await _resp.json();
 
@@ -243,6 +246,7 @@ const CandidateInfo = () => {
             }
             setIsLoading(false);
         } catch (error) {
+            console.log(error, '=err=============');
             Alert.alert('Info', error?.message || 'No candidate found3', [
                 {
                     text: 'OK',
@@ -254,13 +258,6 @@ const CandidateInfo = () => {
             ]);
         }
     };
-
-    console.log(
-        `${s3BucketUrl}/${`apmc-atpadi/qr-scan-app-captured/${encodeURIComponent(
-            hallticket?.ca_approved_photo
-        )}`}`,
-        '========='
-    );
 
     if (isLoading) {
         return <Loading />;
@@ -307,8 +304,10 @@ const CandidateInfo = () => {
                                                 // uri: isPictureTaken ? photoUri : captureImagePlaceholder,
                                                 uri:
                                                     photoUri ||
-                                                    `${s3BucketUrl}/${encodeURIComponent(
-                                                        `apmc-atpadi/qr-scan-app-captured/${hallticket?.ca_approved_photo}`
+                                                    `${
+                                                        processData.p_form_filling_site
+                                                    }/assets/images/qr-captures/${encodeURIComponent(
+                                                        hallticket?.ca_approved_photo
                                                     )}`,
                                             }}
                                         />

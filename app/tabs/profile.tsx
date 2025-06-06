@@ -9,6 +9,12 @@ const Profile = () => {
         (state: RootState) => state.authSlice.currentLoggedinSlotData
     );
 
+    const url = useSelector(
+        (state: RootState) => state.authSlice.currentLoggedInProcessData.p_form_filling_site
+    );
+
+    console.log(currentLoginDetails, 'currentLoginDetails');
+
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Profile</Text>
@@ -17,6 +23,7 @@ const Profile = () => {
                 <ProfileItem label="Username" value={currentLoginDetails?.user_name || 'NA'} />
                 <ProfileItem label="Role" value={currentLoginDetails?.roll || 'NA'} />
                 <ProfileItem label="Current Slot" value={currentLoginDetails?.slot || 'NA'} />
+                <ProfileItem label="Server URL" value={url || 'NA'} />
             </View>
 
             <View style={styles.logoutContainer}>

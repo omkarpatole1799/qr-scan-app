@@ -20,7 +20,6 @@ const AttendanceCountComponent = () => {
     const fetchAndSetAttendanceCount = useCallback(async () => {
         try {
             const _url = `${url}/api/get-attendance-count/${encodeURIComponent(slot)}`;
-            console.log(_url);
             const _resp = await fetch(_url);
 
             if (!_resp.ok) {
@@ -35,7 +34,6 @@ const AttendanceCountComponent = () => {
                 }
             );
         } catch (error) {
-            console.log(error, '-error while fetch attendance count.');
             return undefined;
         } finally {
             setIsLoading(false);
@@ -52,10 +50,6 @@ const AttendanceCountComponent = () => {
 
         return () => clearInterval(interval);
     }, [url, slot]);
-
-    // useFocusEffect(() => {
-    //     fetchAndSetAttendanceCount();
-    // });
 
     if (isLoading) {
         return <Loading />;

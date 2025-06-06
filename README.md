@@ -70,3 +70,18 @@ After building apk the app will directly open on emulator or your device the dir
 
 3. **State Management**
     - In the `currentLoggedinSlotData`, the property `slot` still exists by name, but it now stores the **time string** rather than a numeric value.
+
+---
+
+---
+
+# 📦 Version 3.2.0
+
+## 📝 Change Log
+
+-   Minor code cleanup and fixes
+-   Added process URL into profile page
+
+---
+
+---

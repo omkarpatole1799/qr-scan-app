@@ -7,6 +7,8 @@ const ProcessBannerImage = () => {
     const processUrl = useSelector(
         (state: RootState) => state.authSlice.currentLoggedInProcessData.p_form_filling_site
     );
+
+    console.log(`${processUrl}/assets/images/brand-name.jpg`, '-banner=========');
     return (
         <>
             {processUrl && (
