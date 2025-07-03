@@ -239,7 +239,7 @@ const CandidateInfo = () => {
                 throw new Error(jsonData?.errMsg || 'No candidate found1');
             }
 
-            if (authSlice?.currentLoggedinSlotData.slot != jsonData?.data?.slot?.time || 0) {
+            if (authSlice?.currentLoggedinSlotData.slot != jsonData?.data?.slot?.slot || 0) {
                 throw new Error('No candidate found2');
             } else {
                 setCandidateAllData(jsonData?.data || []);

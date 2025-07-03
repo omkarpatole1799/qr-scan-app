@@ -371,7 +371,7 @@ export default function Login() {
                                             <Picker.Item
                                                 key={idx}
                                                 label={`(Slot-${_el.ca_batch_slot}) ${_el.ca_batch_time}`}
-                                                value={_el.ca_batch_time}
+                                                value={_el.ca_batch_slot}
                                                 style={{}}
                                             />
                                         );
