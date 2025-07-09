@@ -92,7 +92,75 @@ const CandidateInfo = () => {
         } else {
             router.replace('/tabs/scan');
         }
+
+        return () => {
+            console.log('Cleanup function Reseting statues');
+            resetStates();
+        };
     }, [rollNumber]);
+
+    async function resetStates() {
+        await clearCameraCache();
+        // setPhotoUri('');
+
+        // setIsPictureTaken(false);
+        // setIsCandidateApproved(false);
+        // setJustApproved(false);
+        // setCandidateAllData(initialState);
+        // setIsApproving(false);
+        // cameraRef.current = null;
+        // if (photoUri && photoUri.startsWith('file://')) {
+        //     console.log('Cleanup photo url in resetStatus');
+        //     // await FileSystem.deleteAsync(photoUri, { idempotent: true });
+        // }
+    }
+
+    async function clearCameraCache() {
+        try {
+            const cameraDir = FileSystem.cacheDirectory + 'Camera';
+            const imageManupulatorDir = FileSystem.cacheDirectory + 'ImageManipulator';
+
+            const cameraFiles = await FileSystem.readDirectoryAsync(cameraDir);
+            const imageManipulatorFiles = await FileSystem.readDirectoryAsync(imageManupulatorDir);
+
+            for (let file of cameraFiles) {
+                console.log(`Clearing camera cache file: ${file}`);
+                await FileSystem.deleteAsync(cameraDir + '/' + file, { idempotent: true });
+            }
+
+            for (let file of imageManipulatorFiles) {
+                console.log(`Clearing image manipulator cache file: ${file}`);
+                await FileSystem.deleteAsync(imageManupulatorDir + '/' + file, {
+                    idempotent: true,
+                });
+            }
+        } catch (error) {
+            console.error('Error clearing camera cache:', error);
+        }
+    }
+
+    (async () => {
+        const cacheFiles = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory + 'WebView');
+        const cacheFilesImg = await FileSystem.readDirectoryAsync(
+            FileSystem.cacheDirectory + 'image_cache'
+        );
+        console.log('📸 Cached Files :', cacheFiles);
+        console.log('📸 Cached Files :', cacheFilesImg);
+        console.log('📸 Cached Files :', cacheFiles.length);
+
+        const cacheFilesCamera = await FileSystem.readDirectoryAsync(
+            FileSystem.cacheDirectory + 'Camera'
+        );
+        // console.log('📸 Camera Cached Files :', cacheFilesCamera.length);
+
+        const cacheFilesImageManipulator = await FileSystem.readDirectoryAsync(
+            FileSystem.cacheDirectory + 'ImageManipulator'
+        );
+        // console.log('📸 Img manupulator Cached Files :', cacheFilesImageManipulator.length);
+
+        // const cacheFiles = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory + 'ImageManipulator');
+        // console.log('📸 Cached Files :', cacheFiles);
+    })();
 
     const { p: process, ca: candidate, ht: hallticket, slot, s3BucketUrl } = candidateAllData;
 
@@ -137,7 +205,10 @@ const CandidateInfo = () => {
         setJustApproved(false);
         setIsCandidateApproved(false);
         if (cameraRef.current) {
-            const data = await cameraRef.current.takePictureAsync();
+            const data = await cameraRef.current.takePictureAsync({
+                shutterSound: false,
+                quality: 0.2, // Adjust the quality as needed
+            });
             setPhotoUri(data.uri);
             setIsPictureTaken(true);
             closeCamera();
@@ -181,7 +252,6 @@ const CandidateInfo = () => {
 
             const { ca_roll_number, id, ca_reg_id } = hallticket;
 
-            console.log(hallticket, '-hallticket');
             sendData.set('rollNo', ca_roll_number);
             sendData.set('f_id', id);
             sendData.set('r_id', ca_reg_id);
@@ -195,7 +265,6 @@ const CandidateInfo = () => {
             sendData.set('candidatePhoto', base64Data);
 
             let url = `${processData.p_form_filling_site}/api/save-approval-details`;
-            console.log(url);
             const _resp = await fetch(url, {
                 method: 'POST',
                 body: sendData,
@@ -228,12 +297,8 @@ const CandidateInfo = () => {
 
             const url = `${authSlice.currentLoggedInProcessData.p_form_filling_site}/api/get-ht-details-by-roll-no?roll_no=${rollNumber}`;
 
-            console.log({ url });
-
             const _resp = await fetch(url);
             const jsonData = await _resp.json();
-
-            console.log(jsonData, '-json');
 
             if (!_resp.ok) {
                 throw new Error(jsonData?.errMsg || 'No candidate found1');
@@ -463,48 +528,44 @@ const CandidateInfo = () => {
     );
 };
 
-const DetailRow = React.memo(({ label, value }: { label: string; value: string | number }) => (
+const DetailRow = ({ label, value }: { label: string; value: string | number }) => (
     <View style={styles.detailRow}>
         <Text style={styles.detailLabel}>{label}</Text>
         <Text style={styles.detailValue}>{value}</Text>
     </View>
-));
-
-const CapturePhoto = React.memo(
-    ({
-        isCameraOpen,
-        cameraRef,
-        handleTakePicture,
-        closeCamera,
-    }: {
-        isCameraOpen: boolean;
-        cameraRef: any;
-        handleTakePicture: () => {};
-        closeCamera: () => void;
-    }) => {
-        return (
-            <>
-                {isCameraOpen && (
-                    <CameraView style={styles.fullScreenCamera} ref={cameraRef}>
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity
-                                style={[styles.snapButton, styles.buttonPrimary]}
-                                onPress={handleTakePicture}>
-                                <Text style={[styles.text, styles.scannerButtonText]}>
-                                    Take Photo
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.closeButton, styles.buttonDanger]}
-                                onPress={closeCamera}>
-                                <Text style={[styles.text, styles.scannerButtonText]}>Close</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </CameraView>
-                )}
-            </>
-        );
-    }
 );
+
+const CapturePhoto = ({
+    isCameraOpen,
+    cameraRef,
+    handleTakePicture,
+    closeCamera,
+}: {
+    isCameraOpen: boolean;
+    cameraRef: any;
+    handleTakePicture: () => {};
+    closeCamera: () => void;
+}) => {
+    return (
+        <>
+            {isCameraOpen && (
+                <CameraView style={styles.fullScreenCamera} ref={cameraRef}>
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                            style={[styles.snapButton, styles.buttonPrimary]}
+                            onPress={handleTakePicture}>
+                            <Text style={[styles.text, styles.scannerButtonText]}>Take Photo</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.closeButton, styles.buttonDanger]}
+                            onPress={closeCamera}>
+                            <Text style={[styles.text, styles.scannerButtonText]}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </CameraView>
+            )}
+        </>
+    );
+};
 
 export default CandidateInfo;
