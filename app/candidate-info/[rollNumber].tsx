@@ -101,18 +101,6 @@ const CandidateInfo = () => {
 
     async function resetStates() {
         await clearCameraCache();
-        // setPhotoUri('');
-
-        // setIsPictureTaken(false);
-        // setIsCandidateApproved(false);
-        // setJustApproved(false);
-        // setCandidateAllData(initialState);
-        // setIsApproving(false);
-        // cameraRef.current = null;
-        // if (photoUri && photoUri.startsWith('file://')) {
-        //     console.log('Cleanup photo url in resetStatus');
-        //     // await FileSystem.deleteAsync(photoUri, { idempotent: true });
-        // }
     }
 
     async function clearCameraCache() {
@@ -140,7 +128,9 @@ const CandidateInfo = () => {
     }
 
     (async () => {
-        const cacheFiles = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory + 'WebView');
+        const cacheFiles = await FileSystem.readDirectoryAsync(
+            FileSystem.cacheDirectory + 'WebView'
+        );
         const cacheFilesImg = await FileSystem.readDirectoryAsync(
             FileSystem.cacheDirectory + 'image_cache'
         );
