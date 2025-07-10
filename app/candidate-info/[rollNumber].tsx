@@ -172,7 +172,7 @@ const CandidateInfo = () => {
             const data = await cameraRef.current.takePictureAsync({
                 shutterSound: false,
                 skipProcessing: true,
-                // quality: 0.2, // Adjust the quality as needed
+                quality: 0.2, // Adjust the quality as needed
             });
             setPhotoUri(data.uri);
             setIsPictureTaken(true);
