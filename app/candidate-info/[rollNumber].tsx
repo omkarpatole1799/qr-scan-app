@@ -94,7 +94,6 @@ const CandidateInfo = () => {
         }
 
         return () => {
-            console.log('Cleanup function Reseting statues');
             resetStates();
         };
     }, [rollNumber]);
@@ -126,31 +125,6 @@ const CandidateInfo = () => {
             console.error('Error clearing camera cache:', error);
         }
     }
-
-    (async () => {
-        const cacheFiles = await FileSystem.readDirectoryAsync(
-            FileSystem.cacheDirectory + 'WebView'
-        );
-        const cacheFilesImg = await FileSystem.readDirectoryAsync(
-            FileSystem.cacheDirectory + 'image_cache'
-        );
-        console.log('📸 Cached Files :', cacheFiles);
-        console.log('📸 Cached Files :', cacheFilesImg);
-        console.log('📸 Cached Files :', cacheFiles.length);
-
-        const cacheFilesCamera = await FileSystem.readDirectoryAsync(
-            FileSystem.cacheDirectory + 'Camera'
-        );
-        // console.log('📸 Camera Cached Files :', cacheFilesCamera.length);
-
-        const cacheFilesImageManipulator = await FileSystem.readDirectoryAsync(
-            FileSystem.cacheDirectory + 'ImageManipulator'
-        );
-        // console.log('📸 Img manupulator Cached Files :', cacheFilesImageManipulator.length);
-
-        // const cacheFiles = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory + 'ImageManipulator');
-        // console.log('📸 Cached Files :', cacheFiles);
-    })();
 
     const { p: process, ca: candidate, ht: hallticket, slot, s3BucketUrl } = candidateAllData;
 
@@ -197,7 +171,8 @@ const CandidateInfo = () => {
         if (cameraRef.current) {
             const data = await cameraRef.current.takePictureAsync({
                 shutterSound: false,
-                quality: 0.2, // Adjust the quality as needed
+                skipProcessing: true,
+                // quality: 0.2, // Adjust the quality as needed
             });
             setPhotoUri(data.uri);
             setIsPictureTaken(true);
