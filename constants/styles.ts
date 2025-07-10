@@ -140,7 +140,7 @@ export const styles = StyleSheet.create({
     photo: {
         width: 150,
         height: 180,
-        borderRadius: 5,
+        borderRadius: 10,
         backgroundColor: '#ccc',
         position: 'relative',
         resizeMode: 'stretch',
@@ -158,6 +158,7 @@ export const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         resizeMode: 'stretch',
+        borderRadius: 10,
     },
     signatureSection: {
         flexDirection: 'row',
@@ -264,17 +265,17 @@ export const styles = StyleSheet.create({
     },
 
     snapButton: {
-        paddingVertical: 10,
+        paddingVertical: 30,
         paddingHorizontal: 30,
-        borderRadius: 5,
+        borderRadius: 50,
         justifyContent: 'center',
         alignItems: 'center',
     },
 
     closeButton: {
-        paddingVertical: 10,
+        paddingVertical: 30,
         paddingHorizontal: 30,
-        borderRadius: 5,
+        borderRadius: 50,
         justifyContent: 'center',
         alignItems: 'center',
     },

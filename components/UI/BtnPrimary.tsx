@@ -20,7 +20,7 @@ const BtnPrimary: React.FC<BtnPrimaryPropsInterface> = ({
     return (
         <TouchableOpacity
             onPress={onPress}
-            style={[styleForWrapper, disabled ? styles.disabledButton : '']}
+            style={[{ borderRadius: 5 }, styleForWrapper, disabled ? styles.disabledButton : '']}
             disabled={disabled}>
             <Text style={[styles.buttonBase, styles.buttonPrimary, styleForChildren]}>{title}</Text>
         </TouchableOpacity>

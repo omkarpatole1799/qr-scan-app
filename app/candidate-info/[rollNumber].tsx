@@ -1,23 +1,25 @@
 // import axios from 'axios';
+import Fontisto from '@expo/vector-icons/Fontisto';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import Feather from '@expo/vector-icons/Feather';
 import * as FileSystem from 'expo-file-system';
 
 import { RootState } from '@/components/store/store';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
-import React, { RefObject, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import CandidateProfilePhoto from '@/components/CandidateProfilePhoto';
 import CandidateSignature from '@/components/CandidateSignature';
 import BtnPrimary from '@/components/UI/BtnPrimary';
 import BtnSecondary from '@/components/UI/BtnSecondary';
+import Loading from '@/components/UI/Loading';
 import { styles } from '@/constants/styles';
+import { CandidateDataSliceInterface } from '@/types/candidateDataSliceInterface';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Alert, Button, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
-import Loading from '@/components/UI/Loading';
-import { CandidateDataSliceInterface } from '@/types/candidateDataSliceInterface';
 
 const initialState: CandidateDataSliceInterface = {
     qrData: {
@@ -179,17 +181,36 @@ const CandidateInfo = () => {
         setJustApproved(false);
         setIsTakingPicture(true);
         setIsCandidateApproved(false);
-        if (cameraRef.current) {
-            const data = await cameraRef.current.takePictureAsync({
-                shutterSound: false,
-                skipProcessing: true,
-                quality: 0.2, // Adjust the quality as needed
-            });
-            setPhotoUri(data.uri);
-            setIsPictureTaken(true);
-            closeCamera();
+        try {
+            if (cameraRef.current) {
+                const data = await cameraRef.current.takePictureAsync({
+                    shutterSound: false,
+                    skipProcessing: true,
+                    quality: 0.2, // Adjust the quality as needed
+                });
+
+                const fileinfo = await FileSystem.getInfoAsync(data.uri);
+
+                if (!fileinfo.exists) {
+                    throw new Error('File does not exist');
+                }
+                setPhotoUri(data.uri);
+                setIsPictureTaken(true);
+                closeCamera();
+            }
+        } catch (error) {
+            Alert.alert('Info', 'Unable to take picture, try again later', [
+                {
+                    text: 'OK',
+                    onPress: () => {
+                        setIsTakingPicture(false);
+                        closeCamera();
+                    },
+                },
+            ]);
+        } finally {
+            setIsTakingPicture(false);
         }
-        setIsTakingPicture(false);
     };
 
     const compressImage = async (uri, maxWidth = 800, maxHeight = 800, quality = 20) => {
@@ -380,7 +401,7 @@ const CandidateInfo = () => {
 
                             <View
                                 style={{
-                                    backgroundColor: '#cefafe',
+                                    // backgroundColor: '#cefafe',
                                     padding: 8,
                                     borderRadius: 8,
                                     gap: 8,
@@ -481,6 +502,7 @@ const CandidateInfo = () => {
                                 styleForChildren={{
                                     backgroundColor:
                                         isCandidateApproved || justApproved ? 'green' : '#007595',
+                                    opacity: isApproving ? 0.5 : 1,
                                 }}
                                 title={
                                     isApproving
@@ -541,20 +563,19 @@ const CapturePhoto = ({
                             disabled={isTakingPicture}>
                             <Text style={[styles.text, styles.scannerButtonText]}>
                                 {isTakingPicture && (
-                                    <AntDesign
-                                        name="loading1"
-                                        size={18}
-                                        color="black"
-                                        className="animate-spin"
-                                    />
+                                    <AntDesign name="loading1" size={34} color="white" />
                                 )}
-                                {!isTakingPicture && 'Take Photo'}
+                                {!isTakingPicture && (
+                                    <Feather name="camera" size={34} color="white" />
+                                )}
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.closeButton, styles.buttonDanger]}
                             onPress={closeCamera}>
-                            <Text style={[styles.text, styles.scannerButtonText]}>Close</Text>
+                            <Text style={[styles.text, styles.scannerButtonText]}>
+                                <Fontisto name="close" size={34} color="white" />
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </CameraView>
