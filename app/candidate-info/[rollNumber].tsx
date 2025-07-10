@@ -110,16 +110,25 @@ const CandidateInfo = () => {
             const cameraFiles = await FileSystem.readDirectoryAsync(cameraDir);
             const imageManipulatorFiles = await FileSystem.readDirectoryAsync(imageManupulatorDir);
 
-            for (let file of cameraFiles) {
-                console.log(`Clearing camera cache file: ${file}`);
-                await FileSystem.deleteAsync(cameraDir + '/' + file, { idempotent: true });
+            const contentsInCamDir = await FileSystem.readDirectoryAsync(cameraDir);
+            const contentsInImageManipulatorDir = await FileSystem.readDirectoryAsync(
+                imageManupulatorDir
+            );
+
+            if (contentsInCamDir.length !== 0) {
+                for (let file of cameraFiles) {
+                    console.log(`Clearing camera cache file: ${file}`);
+                    await FileSystem.deleteAsync(cameraDir + '/' + file, { idempotent: true });
+                }
             }
 
-            for (let file of imageManipulatorFiles) {
-                console.log(`Clearing image manipulator cache file: ${file}`);
-                await FileSystem.deleteAsync(imageManupulatorDir + '/' + file, {
-                    idempotent: true,
-                });
+            if (contentsInImageManipulatorDir.length !== 0) {
+                for (let file of imageManipulatorFiles) {
+                    console.log(`Clearing image manipulator cache file: ${file}`);
+                    await FileSystem.deleteAsync(imageManupulatorDir + '/' + file, {
+                        idempotent: true,
+                    });
+                }
             }
         } catch (error) {
             console.error('Error clearing camera cache:', error);
@@ -132,6 +141,7 @@ const CandidateInfo = () => {
     const [permission, requestPermission] = useCameraPermissions();
 
     const [isPictureTaken, setIsPictureTaken] = useState(false);
+    const [isTakingPicture, setIsTakingPicture] = useState(false);
     const [photoUri, setPhotoUri] = useState('');
     const cameraRef = useRef(null);
 
@@ -167,6 +177,7 @@ const CandidateInfo = () => {
 
     const handleTakePicture = async () => {
         setJustApproved(false);
+        setIsTakingPicture(true);
         setIsCandidateApproved(false);
         if (cameraRef.current) {
             const data = await cameraRef.current.takePictureAsync({
@@ -178,6 +189,7 @@ const CandidateInfo = () => {
             setIsPictureTaken(true);
             closeCamera();
         }
+        setIsTakingPicture(false);
     };
 
     const compressImage = async (uri, maxWidth = 800, maxHeight = 800, quality = 20) => {
@@ -304,6 +316,7 @@ const CandidateInfo = () => {
             {/* <View style={styles.container}> */}
 
             <CapturePhoto
+                isTakingPicture={isTakingPicture}
                 isCameraOpen={isCameraOpen}
                 cameraRef={cameraRef}
                 handleTakePicture={handleTakePicture}
@@ -501,11 +514,13 @@ const DetailRow = ({ label, value }: { label: string; value: string | number }) 
 );
 
 const CapturePhoto = ({
+    isTakingPicture,
     isCameraOpen,
     cameraRef,
     handleTakePicture,
     closeCamera,
 }: {
+    isTakingPicture: boolean;
     isCameraOpen: boolean;
     cameraRef: any;
     handleTakePicture: () => {};
@@ -517,9 +532,24 @@ const CapturePhoto = ({
                 <CameraView style={styles.fullScreenCamera} ref={cameraRef}>
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity
-                            style={[styles.snapButton, styles.buttonPrimary]}
-                            onPress={handleTakePicture}>
-                            <Text style={[styles.text, styles.scannerButtonText]}>Take Photo</Text>
+                            style={[
+                                styles.snapButton,
+                                styles.buttonPrimary,
+                                isTakingPicture && { opacity: 0.5 },
+                            ]}
+                            onPress={handleTakePicture}
+                            disabled={isTakingPicture}>
+                            <Text style={[styles.text, styles.scannerButtonText]}>
+                                {isTakingPicture && (
+                                    <AntDesign
+                                        name="loading1"
+                                        size={18}
+                                        color="black"
+                                        className="animate-spin"
+                                    />
+                                )}
+                                {!isTakingPicture && 'Take Photo'}
+                            </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.closeButton, styles.buttonDanger]}
