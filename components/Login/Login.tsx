@@ -19,24 +19,29 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 import Loading from '../UI/Loading';
+import { cleanupUrl } from '../utils/help';
 import { getProcessList } from './api';
-import { LoginFormData } from './types';
-import { ApiError } from '../commontypes/apiTypes';
+import {
+    CurrentLoggedInSlot,
+    ExamCenterDetails,
+    LoginFormData,
+    ProcessData,
+    SlotDetails,
+} from './types';
 
-const defaultLoginFormValue = {
-    // username: 'test', // Set the dummy username
-    // password: 'test', // Set the dummy password
-    // processUrl: 'http://192.168.1.2:3001',
-    // slot: '1',
-    // date: '03-05-2025',
-    // center: '101',
-
+const defaultLoginFormValue: LoginFormData = {
     username: '', // Set the dummy username
     password: '', // Set the dummy password
     processUrl: '',
-    slot: '',
+    slot: {
+        ca_batch_slot: '',
+        ca_batch_time: '',
+    },
     date: '',
-    center: '',
+    center: {
+        ca_center_code: '',
+        ca_center_name: '',
+    },
 };
 
 export default function Login() {
@@ -48,10 +53,10 @@ export default function Login() {
     const [allotmentDetails, setAllotmentDetails] = useState([]);
 
     const [examDates, setExamDates] = useState([]);
-    const [examCentersList, setExamCentersList] = useState([]);
-    const [examSlotsList, setExamSlotsList] = useState([]);
+    const [examCentersList, setExamCentersList] = useState<ExamCenterDetails[]>([]);
+    const [examSlotsList, setExamSlotsList] = useState<SlotDetails[]>([]);
     const dispatch = useDispatch();
-    const [processList, setProcessList] = useState([]);
+    const [processList, setProcessList] = useState<ProcessData[]>([]);
 
     async function getAndSetProcessList() {
         setIsLoading(true);
@@ -77,9 +82,7 @@ export default function Login() {
 
     const onSubmit = useCallback(async (formData: LoginFormData) => {
         try {
-            console.log(formData, '-formData==');
             const url = `${formData.processUrl}/api/login`;
-            console.log(url, '+for login==============');
 
             setIsLoading(true);
 
@@ -98,14 +101,13 @@ export default function Login() {
 
             const data = await _resp.json();
 
-            let currentLoggedinSlotData = data?.data?._loginDetails[0] || [];
+            let currentLoggedinSlotData: CurrentLoggedInSlot = data?.data?._loginDetails[0] || [];
             currentLoggedinSlotData.slot = formData.slot;
 
-            console.log(currentLoggedinSlotData, 'currentLoggedinSlotData');
+            currentLoggedinSlotData.date = formData.date;
+            currentLoggedinSlotData.center = formData.center;
 
             const processData = data?.data?._processData[0] || [];
-
-            console.log(processData, '---');
 
             dispatch(
                 setCurrentLoggedInProcessData({
@@ -158,6 +160,7 @@ export default function Login() {
                 setExamDates(jsonData.data);
             }
         } catch (err) {
+            console.log(1);
             Alert.alert('Warning', err?.message || 'Try again after some time.', [
                 {
                     text: 'OK',
@@ -186,16 +189,17 @@ export default function Login() {
     }, [watchExamDateChange, setValue]);
 
     const getCentersList = useCallback(async (url: string, exam_date: string) => {
-        console.log(url, exam_date, '---');
         try {
             setIsLoading(true);
             const _resp = await fetch(`${url}/api/get-centers-list?exam_date=${exam_date}`);
             if (!_resp.ok) throw new Error('Unable to get centers list');
             const jsonData = await _resp.json();
+            console.log(jsonData.data, '-exam Center list');
             if (jsonData.data) {
                 setExamCentersList(jsonData.data);
             }
         } catch (err) {
+            console.log(2);
             Alert.alert('Warning', err?.message || 'Try again after some time.', [
                 {
                     text: 'OK',
@@ -210,14 +214,17 @@ export default function Login() {
     const watchCenterChange = watch('center');
 
     useEffect(() => {
-        if (watchCenterChange) {
-            getSlotsList(watchProcessUrl, watchExamDateChange, watchCenterChange);
+        if (
+            watchCenterChange &&
+            watchCenterChange.ca_center_name &&
+            watchCenterChange.ca_center_code
+        ) {
+            getSlotsList(watchProcessUrl, watchExamDateChange, watchCenterChange.ca_center_code);
         }
     }, [watchCenterChange, setValue]);
 
     const getSlotsList = useCallback(
         async (url: string, exam_date: string, center_code: string) => {
-            console.log(url, exam_date, center_code, '---');
             try {
                 setIsLoading(true);
                 const _resp = await fetch(
@@ -229,6 +236,7 @@ export default function Login() {
                     setExamSlotsList(jsonData.data);
                 }
             } catch (err) {
+                console.log(3);
                 Alert.alert('Warning', err?.message || 'Try again after some time.', [
                     {
                         text: 'OK',
@@ -255,8 +263,12 @@ export default function Login() {
             }}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? inset.top + 80 : 100}
+                contentContainerStyle={{ flexGrow: 1, paddingBottom: inset.bottom + 160 }}
                 style={{ flex: 1 }}>
-                <ScrollView>
+                <ScrollView
+                // contentContainerStyle={{ flexGrow: 1, paddingBottom: inset.bottom + 250 }}
+                >
                     <Text style={styles.header}>Welcome</Text>
                     <Text style={styles.subHeader}>Biometric Attendance</Text>
 
@@ -277,7 +289,7 @@ export default function Login() {
                                             <Picker.Item
                                                 key={idx}
                                                 label={process.process_name}
-                                                value={process.process_url}
+                                                value={cleanupUrl(process.process_url)}
                                             />
                                         );
                                     })}
@@ -340,7 +352,8 @@ export default function Login() {
                                                 key={idx}
                                                 // label={`${_el.ai_collage_name} : ${_el.ai_slot_time}`}
                                                 label={` (${_el.ca_center_code}) ${_el.ca_center_name}`}
-                                                value={_el.ca_center_code}
+                                                // value={_el.ca_center_code}
+                                                value={_el}
                                                 style={{}}
                                             />
                                         );
@@ -371,7 +384,8 @@ export default function Login() {
                                             <Picker.Item
                                                 key={idx}
                                                 label={`(Slot-${_el.ca_batch_slot}) ${_el.ca_batch_time}`}
-                                                value={_el.ca_batch_slot}
+                                                value={_el}
+                                                // value={_el.ca_batch_slot}
                                                 style={{}}
                                             />
                                         );
@@ -419,7 +433,7 @@ export default function Login() {
                                     value={value}
                                 />
                                 {errors.username && (
-                                    <Text style={styles.error}>{errors.password.message}</Text>
+                                    <Text style={styles.error}>{errors?.password?.message}</Text>
                                 )}
                             </View>
                         )}
@@ -440,7 +454,7 @@ export default function Login() {
                                 setExamSlotsList([]);
                                 setExamCentersList([]);
                                 setExamDates([]);
-                                getProcessList();
+                                getAndSetProcessList();
                             }}
                         />
                     </View>

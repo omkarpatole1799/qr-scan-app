@@ -185,7 +185,7 @@ const CandidateInfo = () => {
             if (cameraRef.current) {
                 const data = await cameraRef.current.takePictureAsync({
                     shutterSound: false,
-                    skipProcessing: true,
+                    // skipProcessing: true,
                     quality: 0.2, // Adjust the quality as needed
                 });
 
@@ -269,7 +269,8 @@ const CandidateInfo = () => {
             });
 
             if (!_resp.ok) {
-                throw new Error('Error while approving');
+                const jsonResp = await _resp.json()
+                throw new Error(jsonResp?.errMsg || 'Error while approving');
             }
 
             setJustApproved(true);

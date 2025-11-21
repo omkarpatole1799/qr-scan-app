@@ -4,7 +4,6 @@ import { Alert } from 'react-native';
 export async function getProcessList() {
     try {
         const url = `${UTTIRNA_URL}/api/get-process-list`;
-        console.log(url, 'url-----');
         const _resp = await fetch(url);
         const _data = await _resp.json();
         return JSON.parse(_data.data) || [];

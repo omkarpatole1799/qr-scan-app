@@ -13,8 +13,6 @@ const Profile = () => {
         (state: RootState) => state.authSlice.currentLoggedInProcessData.p_form_filling_site
     );
 
-    console.log(currentLoginDetails, 'currentLoginDetails');
-
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Profile</Text>
@@ -22,7 +20,15 @@ const Profile = () => {
             <View style={styles.card}>
                 <ProfileItem label="Username" value={currentLoginDetails?.user_name || 'NA'} />
                 <ProfileItem label="Role" value={currentLoginDetails?.roll || 'NA'} />
-                <ProfileItem label="Current Slot" value={currentLoginDetails?.slot || 'NA'} />
+                <ProfileItem
+                    label="Slot & Time"
+                    value={`Slot - ${currentLoginDetails?.slot?.ca_batch_slot} (${currentLoginDetails?.slot?.ca_batch_time})`}
+                />
+                <ProfileItem label="Exam Date" value={currentLoginDetails?.date || 'NA'} />
+                <ProfileItem
+                    label="Center"
+                    value={`(${currentLoginDetails?.center?.ca_center_code}) ${currentLoginDetails?.center?.ca_center_name} `}
+                />
                 <ProfileItem label="Server URL" value={url || 'NA'} />
             </View>
 

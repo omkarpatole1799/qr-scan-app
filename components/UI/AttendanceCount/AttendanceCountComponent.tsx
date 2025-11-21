@@ -15,7 +15,9 @@ const AttendanceCountComponent = () => {
         (state: RootState) => state.authSlice.currentLoggedInProcessData.p_form_filling_site
     );
 
-    const slot = useSelector((state: RootState) => state.authSlice.currentLoggedinSlotData.slot);
+    const slot = useSelector(
+        (state: RootState) => state.authSlice.currentLoggedinSlotData.slot.ca_batch_slot
+    );
 
     const fetchAndSetAttendanceCount = useCallback(async () => {
         try {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Image, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { RootState } from './store/store';
@@ -8,7 +8,6 @@ const ProcessBannerImage = () => {
         (state: RootState) => state.authSlice.currentLoggedInProcessData.p_form_filling_site
     );
 
-    console.log(`${processUrl}/assets/images/brand-name.jpg`, '-banner=========');
     return (
         <>
             {processUrl && (
@@ -35,4 +34,4 @@ const ProcessBannerImage = () => {
     );
 };
 
-export default ProcessBannerImage;
+export default memo(ProcessBannerImage);

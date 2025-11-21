@@ -14,7 +14,7 @@
 		96905EF65AED1B983A6B3ABC /* libPods-BiometricAttendance.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58EEBF8E8E6FB1BC6CAF49B5 /* libPods-BiometricAttendance.a */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		D831B7A0D39B42C293800D56 /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C4D23FBA0E14DD5B35453F1 /* noop-file.swift */; };
+		88A23EA64A7A44CFB685186D /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408BE2ACF3D84506AD61F17A /* noop-file.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,8 +31,8 @@
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-BiometricAttendance/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		9C4D23FBA0E14DD5B35453F1 /* noop-file.swift */ = {isa = PBXFileReference; name = "noop-file.swift"; path = "BiometricAttendance/noop-file.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
-		07605F4B3D914C8B86C8AE12 /* BiometricAttendance-Bridging-Header.h */ = {isa = PBXFileReference; name = "BiometricAttendance-Bridging-Header.h"; path = "BiometricAttendance/BiometricAttendance-Bridging-Header.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
+		408BE2ACF3D84506AD61F17A /* noop-file.swift */ = {isa = PBXFileReference; name = "noop-file.swift"; path = "BiometricAttendance/noop-file.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
+		4643F70193914161A430F6B0 /* BiometricAttendance-Bridging-Header.h */ = {isa = PBXFileReference; name = "BiometricAttendance-Bridging-Header.h"; path = "BiometricAttendance/BiometricAttendance-Bridging-Header.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,8 +57,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				9C4D23FBA0E14DD5B35453F1 /* noop-file.swift */,
-				07605F4B3D914C8B86C8AE12 /* BiometricAttendance-Bridging-Header.h */,
+				408BE2ACF3D84506AD61F17A /* noop-file.swift */,
+				4643F70193914161A430F6B0 /* BiometricAttendance-Bridging-Header.h */,
 			);
 			name = BiometricAttendance;
 			sourceTree = "<group>";
@@ -198,7 +198,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				BE6E3A453B814419A9228A80 /* BiometricAttendance-Bridging-Header.h in Resources */,
+				6885298F4C164FF1810427BA /* BiometricAttendance-Bridging-Header.h in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,7 +274,7 @@
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
-				D831B7A0D39B42C293800D56 /* noop-file.swift in Sources */,
+				88A23EA64A7A44CFB685186D /* noop-file.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
