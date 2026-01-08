@@ -266,9 +266,7 @@ export default function Login() {
                 keyboardVerticalOffset={Platform.OS === 'ios' ? inset.top + 80 : 100}
                 contentContainerStyle={{ flexGrow: 1, paddingBottom: inset.bottom + 160 }}
                 style={{ flex: 1 }}>
-                <ScrollView
-                // contentContainerStyle={{ flexGrow: 1, paddingBottom: inset.bottom + 250 }}
-                >
+                <ScrollView keyboardShouldPersistTaps="handled">
                     <Text style={styles.header}>Welcome</Text>
                     <Text style={styles.subHeader}>Biometric Attendance</Text>
 

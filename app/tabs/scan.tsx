@@ -39,7 +39,10 @@ const ScanQrPage = () => {
             }}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
                 <ProcessBannerImage />
-                <ScrollView scrollEnabled={false} showsVerticalScrollIndicator={false}>
+                <ScrollView
+                    keyboardShouldPersistTaps="handled"
+                    scrollEnabled={false}
+                    showsVerticalScrollIndicator={false}>
                     <View
                         style={{
                             display: 'flex',
