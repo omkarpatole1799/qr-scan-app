@@ -57,7 +57,7 @@ const ScanCamera = () => {
         console.log(parsedQrData, 'parsedQrADAta');
         console.log(currentSlotData, '-currentSlotData');
 
-        if (currentSlotData?.slot != parsedQrData.slot) {
+        if (currentSlotData?.slot?.ca_batch_slot != parsedQrData.slot) {
             Alert.alert('Info', 'No candidate found22', [
                 {
                     text: 'ok',

@@ -20,7 +20,7 @@ const CandidateProfilePhoto: React.FC<CandidateProfilePhotoPropsInterface> = ({
                 <Image
                     style={styles.photo}
                     source={{
-                        uri: `${s3BucketUrl}/${photo}`,
+                        uri: `${s3BucketUrl}${photo}?t=${Date.now()}`,
                     }}
                     onLoadStart={() => setIsImageLoading(true)}
                     onLoadEnd={() => setIsImageLoading(false)}

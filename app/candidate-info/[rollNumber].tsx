@@ -248,11 +248,10 @@ const CandidateInfo = () => {
 
             const sendData = new FormData();
 
-            const { ca_roll_number, id, ca_reg_id } = hallticket;
 
-            sendData.set('rollNo', ca_roll_number);
-            sendData.set('f_id', id);
-            sendData.set('r_id', ca_reg_id);
+            sendData.set('rollNo', hallticket?.ca_roll_number);
+            sendData.set('f_id', hallticket?.id);
+            sendData.set('r_id', hallticket?.ca_reg_id);
             sendData.set('approved_by_user_id', `${currentLoggedInUserId}`);
 
             const compressedPhotoUri = await compressImage(photoUri);
@@ -269,7 +268,7 @@ const CandidateInfo = () => {
             });
 
             if (!_resp.ok) {
-                const jsonResp = await _resp.json()
+                const jsonResp = await _resp.json();
                 throw new Error(jsonResp?.errMsg || 'Error while approving');
             }
 
@@ -303,7 +302,11 @@ const CandidateInfo = () => {
                 throw new Error(jsonData?.errMsg || 'No candidate found1');
             }
 
-            if (authSlice?.currentLoggedinSlotData.slot != jsonData?.data?.slot?.slot || 0) {
+            if (
+                authSlice?.currentLoggedinSlotData?.slot?.ca_batch_slot !=
+                    jsonData?.data?.slot?.slot ||
+                0
+            ) {
                 throw new Error('No candidate found2');
             } else {
                 setCandidateAllData(jsonData?.data || []);
@@ -366,14 +369,13 @@ const CandidateInfo = () => {
                                         <Image
                                             style={styles.photo}
                                             source={{
-                                                // uri: isPictureTaken ? photoUri : captureImagePlaceholder,
                                                 uri:
                                                     photoUri ||
                                                     `${
                                                         processData.p_form_filling_site
                                                     }/assets/images/qr-captures/${encodeURIComponent(
                                                         hallticket?.ca_approved_photo
-                                                    )}`,
+                                                    )}?t=${Date.now()}`,
                                             }}
                                         />
                                     ) : (

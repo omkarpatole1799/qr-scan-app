@@ -21,7 +21,7 @@ const CandidateSignature: React.FC<CandidateProfilePhotoPropsInterface> = ({
                     <Image
                         style={styles.signPhoto}
                         source={{
-                            uri: `${s3BucketUrl}/${sign}`,
+                            uri: `${s3BucketUrl}/${sign}?t=${Date.now()}`,
                         }}
                         onLoadStart={() => setIsImageLoading(true)}
                         onLoadEnd={() => setIsImageLoading(false)}
