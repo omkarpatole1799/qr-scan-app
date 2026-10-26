@@ -50,11 +50,9 @@ export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
-    const [allotmentDetails, setAllotmentDetails] = useState([]);
-
-    const [examDates, setExamDates] = useState([]);
+    const [examDates, setExamDates] = useState<{ exam_date: string }[]>([]);
     const [examCentersList, setExamCentersList] = useState<ExamCenterDetails[]>([]);
-    const [examSlotsList, setExamSlotsList] = useState<SlotDetails[]>([]);
+    const [ examSlotsList, setExamSlotsList] = useState<SlotDetails[]>([]);
     const dispatch = useDispatch();
     const [processList, setProcessList] = useState<ProcessData[]>([]);
 
@@ -83,7 +81,7 @@ export default function Login() {
     const onSubmit = useCallback(async (formData: LoginFormData) => {
         try {
             const url = `${formData.processUrl}/api/login`;
-
+            //const url = `http://192.168.1.9:5004/api/login`;
             setIsLoading(true);
 
             const _resp = await fetch(url, {
@@ -129,27 +127,6 @@ export default function Login() {
         }
     }, []);
 
-    const fetchAllotmentDetails = useCallback(async (url: string) => {
-        try {
-            setIsLoading(true);
-            const _resp = await fetch(`${url}/api/get-allotment-info`);
-            if (!_resp.ok) throw new Error('Unable to get allotment details');
-            const jsonData = await _resp.json();
-            if (jsonData.data) {
-                setAllotmentDetails(jsonData.data);
-            }
-        } catch (err) {
-            Alert.alert('Warning', err?.message || 'Try again after some time.', [
-                {
-                    text: 'OK',
-                    onPress: () => {},
-                },
-            ]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
     const getExamDates = useCallback(async (url: string) => {
         try {
             setIsLoading(true);
@@ -159,8 +136,7 @@ export default function Login() {
             if (jsonData.data) {
                 setExamDates(jsonData.data);
             }
-        } catch (err) {
-            console.log(1);
+        } catch (err: any) {
             Alert.alert('Warning', err?.message || 'Try again after some time.', [
                 {
                     text: 'OK',
@@ -171,22 +147,6 @@ export default function Login() {
             setIsLoading(false);
         }
     }, []);
-
-    const watchProcessUrl = watch('processUrl');
-    useEffect(() => {
-        if (watchProcessUrl) {
-            // fetchAllotmentDetails(watchProcessUrl);
-            getExamDates(watchProcessUrl);
-        }
-    }, [watchProcessUrl, setValue]);
-
-    const watchExamDateChange = watch('date');
-
-    useEffect(() => {
-        if (watchExamDateChange) {
-            getCentersList(watchProcessUrl, watchExamDateChange);
-        }
-    }, [watchExamDateChange, setValue]);
 
     const getCentersList = useCallback(async (url: string, exam_date: string) => {
         try {
@@ -194,12 +154,10 @@ export default function Login() {
             const _resp = await fetch(`${url}/api/get-centers-list?exam_date=${exam_date}`);
             if (!_resp.ok) throw new Error('Unable to get centers list');
             const jsonData = await _resp.json();
-            console.log(jsonData.data, '-exam Center list');
             if (jsonData.data) {
                 setExamCentersList(jsonData.data);
             }
-        } catch (err) {
-            console.log(2);
+        } catch (err: any) {
             Alert.alert('Warning', err?.message || 'Try again after some time.', [
                 {
                     text: 'OK',
@@ -211,32 +169,19 @@ export default function Login() {
         }
     }, []);
 
-    const watchCenterChange = watch('center');
-
-    useEffect(() => {
-        if (
-            watchCenterChange &&
-            watchCenterChange.ca_center_name &&
-            watchCenterChange.ca_center_code
-        ) {
-            getSlotsList(watchProcessUrl, watchExamDateChange, watchCenterChange.ca_center_code);
-        }
-    }, [watchCenterChange, setValue]);
-
     const getSlotsList = useCallback(
         async (url: string, exam_date: string, center_code: string) => {
             try {
                 setIsLoading(true);
                 const _resp = await fetch(
-                    `${url}/api/get-slots-list?exam_date=${exam_date}&center_code='${center_code}'`
+                    `${url}/api/get-slots-list?exam_date=${exam_date}&center_code=${center_code}`
                 );
                 if (!_resp.ok) throw new Error('Unable to get slots list');
                 const jsonData = await _resp.json();
                 if (jsonData.data) {
                     setExamSlotsList(jsonData.data);
                 }
-            } catch (err) {
-                console.log(3);
+            } catch (err: any) {
                 Alert.alert('Warning', err?.message || 'Try again after some time.', [
                     {
                         text: 'OK',
@@ -249,6 +194,47 @@ export default function Login() {
         },
         []
     );
+
+    const watchProcessUrl = watch('processUrl');
+    useEffect(() => {
+        if (watchProcessUrl) {
+            setValue('date', '');
+            setValue('center', defaultLoginFormValue.center);
+            setValue('slot', defaultLoginFormValue.slot);
+            setExamDates([]);
+            setExamCentersList([]);
+            setExamSlotsList([]);
+            getExamDates(watchProcessUrl);
+        }
+    }, [watchProcessUrl, setValue, getExamDates]);
+
+    const watchExamDateChange = watch('date');
+
+    useEffect(() => {
+        if (watchExamDateChange && watchProcessUrl) {
+            setValue('center', defaultLoginFormValue.center);
+            setValue('slot', defaultLoginFormValue.slot);
+            setExamCentersList([]);
+            setExamSlotsList([]);
+            getCentersList(watchProcessUrl, watchExamDateChange);
+        }
+    }, [watchExamDateChange, watchProcessUrl, setValue, getCentersList]);
+
+    const watchCenterChange = watch('center');
+
+    useEffect(() => {
+        if (
+            watchCenterChange &&
+            watchCenterChange.ca_center_name &&
+            watchCenterChange.ca_center_code &&
+            watchProcessUrl &&
+            watchExamDateChange
+        ) {
+            setValue('slot', defaultLoginFormValue.slot);
+            setExamSlotsList([]);
+            getSlotsList(watchProcessUrl, watchExamDateChange, watchCenterChange.ca_center_code);
+        }
+    }, [watchCenterChange, watchProcessUrl, watchExamDateChange, setValue, getSlotsList]);
 
     if (isLoading) {
         return <Loading />;
@@ -427,11 +413,12 @@ export default function Login() {
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Password"
+                                    secureTextEntry
                                     onChangeText={onChange}
                                     value={value}
                                 />
-                                {errors.username && (
-                                    <Text style={styles.error}>{errors?.password?.message}</Text>
+                                {errors.password && (
+                                    <Text style={styles.error}>{errors.password.message}</Text>
                                 )}
                             </View>
                         )}

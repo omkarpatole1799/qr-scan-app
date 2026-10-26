@@ -25,4 +25,4 @@ export const Colors = {
   },
 };
 
-export const UTTIRNA_URL = 'https://uttirna.in'
+export const UTTIRNA_URL = 'https://lab.uttirna.in'

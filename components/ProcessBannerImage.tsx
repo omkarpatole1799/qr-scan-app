@@ -4,13 +4,13 @@ import { useSelector } from 'react-redux';
 import { RootState } from './store/store';
 
 const ProcessBannerImage = () => {
-    const processUrl = useSelector(
-        (state: RootState) => state.authSlice.currentLoggedInProcessData.p_form_filling_site
+    const headerUrl = useSelector(
+        (state: RootState) => state.authSlice.currentLoggedInProcessData.headerUrl,
     );
 
     return (
         <>
-            {processUrl && (
+            {headerUrl && (
                 <View
                     style={{
                         height: 100,
@@ -25,7 +25,7 @@ const ProcessBannerImage = () => {
                             resizeMode: 'stretch',
                         }}
                         source={{
-                            uri: `${processUrl}/assets/images/brand-name.jpg`,
+                            uri: `${headerUrl}`,
                         }}
                     />
                 </View>

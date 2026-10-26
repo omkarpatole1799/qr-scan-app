@@ -33,6 +33,9 @@ export interface AuthSliceInterface {
     isAuth: boolean;
     currentLoggedInProcessData: {
         p_form_filling_site: string;
+        is_use_rabbit_mq?: number;
+        headerUrl?: string;
+        imgBaseURL?: string;
     };
     currentLoggedinSlotData: CurrentLoggedInSlot;
 }

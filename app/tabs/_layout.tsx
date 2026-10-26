@@ -16,6 +16,17 @@ const tabsLayout = () => {
                         ),
                     }}
                 />
+            
+             <Tabs.Screen
+                    name="interview-attendance-dashboard"
+                    options={{
+                        title: 'Interview Dashboard',
+                        tabBarIcon: () => <AntDesign name="home" size={20} color="black" />,
+                        headerShown: false,
+                    }}
+                />
+            
+            
                 <Tabs.Screen
                     name="count"
                     options={{
@@ -32,6 +43,9 @@ const tabsLayout = () => {
                     }}
                 />
             </Tabs>
+
+
+
         </>
     );
 };

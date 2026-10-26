@@ -22,51 +22,49 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSelector } from 'react-redux';
 
 const initialState: CandidateDataSliceInterface = {
-    qrData: {
-        f_id: 0,
-        r_id: 0,
-        slot: 0,
-        roll_no: 0,
+    p: [],
+    ca: {
+        id: 0,
+        ub_aadhar_number: '',
+        ub_alternative_number: '',
+        ub_email_id: '',
+        ub_first_name: '',
+        ub_last_name: '',
+        ub_middle_name: '',
+        ub_mobile_number: '',
+        ub_otp: '',
+        ub_pan_card: '',
+        ub_password: '',
     },
-    candidateAllDetails: {
-        ca: {
-            id: 0,
-            ub_aadhar_number: '',
-            ub_alternative_number: '',
-            ub_email_id: '',
-            ub_first_name: '',
-            ub_last_name: '',
-            ub_middle_name: '',
-            ub_mobile_number: '',
-            ub_otp: '',
-            ub_pan_card: '',
-            ub_password: '',
-        },
-        ht: {
-            id: 0,
-            ca_reg_id: 0,
-
-            ca_photo: '',
-            ca_sign: '',
-            ca_approved_photo: '',
-            ca_is_approved: '',
-
-            ca_alloted_lab_id: 0,
-            exam_date: '',
-            lab_name: '',
-            department: '',
-            ca_gender: '',
-            ca_batch_time: '',
-        },
-        slot: {
-            id: 0,
-            entry_time: '',
-            gate_close_time: '',
-            slot: '',
-            time: '',
-        },
-        s3BucketUrl: '',
+    ht: {
+        id: 0,
+        ca_reg_id: 0,
+        ca_photo: '',
+        ca_photo_url: '',
+        ca_sign: '',
+        ca_sign_url: '',
+        ca_approved_photo: '',
+        ca_approved_photo_url: '',
+        ca_is_approved: '',
+        ca_alloted_lab_id: 0,
+        exam_date: '',
+        lab_name: '',
+        department: '',
+        floor: '',
+        ca_gender: '',
+        ca_batch_time: '',
+        ca_center_name: '',
+        ca_roll_number: '',
+        ca_post_name: '',
     },
+    slot: {
+        id: 0,
+        entry_time: '',
+        gate_close_time: '',
+        slot: '',
+        time: '',
+    },
+    s3BucketUrl: '',
 };
 
 const CandidateInfo = () => {
@@ -90,7 +88,8 @@ const CandidateInfo = () => {
 
     useEffect(() => {
         if (rollNumber) {
-            getStudentByRollNumber(rollNumber);
+            const roll = Array.isArray(rollNumber) ? rollNumber[0] : rollNumber;
+            getStudentByRollNumber(roll);
         } else {
             router.replace('/tabs/scan');
         }
@@ -113,9 +112,8 @@ const CandidateInfo = () => {
             const imageManipulatorFiles = await FileSystem.readDirectoryAsync(imageManupulatorDir);
 
             const contentsInCamDir = await FileSystem.readDirectoryAsync(cameraDir);
-            const contentsInImageManipulatorDir = await FileSystem.readDirectoryAsync(
-                imageManupulatorDir
-            );
+            const contentsInImageManipulatorDir =
+                await FileSystem.readDirectoryAsync(imageManupulatorDir);
 
             if (contentsInCamDir.length !== 0) {
                 for (let file of cameraFiles) {
@@ -139,13 +137,26 @@ const CandidateInfo = () => {
 
     const { p: process, ca: candidate, ht: hallticket, slot, s3BucketUrl } = candidateAllData;
 
+    const processFolder = process?.[0]?.p_desc || process?.p_desc || '';
+    
+    const s3PhotoFolder = processFolder
+        ? `${s3BucketUrl?.replace(/\/+$/, '')}/${processFolder.replace(
+              /^\/+|\/+$/g,
+              '',
+          )}/users`
+        : '';
+    
+    console.log('S3 Bucket:', s3BucketUrl);
+    console.log('Process Folder:', processFolder);
+    console.log('S3 Photo Folder:', s3PhotoFolder);
+
     const [isCameraOpen, setIsCameraOpen] = useState(false);
     const [permission, requestPermission] = useCameraPermissions();
 
     const [isPictureTaken, setIsPictureTaken] = useState(false);
     const [isTakingPicture, setIsTakingPicture] = useState(false);
     const [photoUri, setPhotoUri] = useState('');
-    const cameraRef = useRef(null);
+    const cameraRef = useRef<any>(null);
 
     const [isCandidateApproved, setIsCandidateApproved] = useState(false);
     const [isApproving, setIsApproving] = useState(false);
@@ -213,12 +224,12 @@ const CandidateInfo = () => {
         }
     };
 
-    const compressImage = async (uri, maxWidth = 800, maxHeight = 800, quality = 20) => {
+    const compressImage = async (uri: string, maxWidth = 800, maxHeight = 800, quality = 20) => {
         try {
             const result = await ImageManipulator.manipulateAsync(
                 uri,
                 [{ resize: { width: maxWidth, height: maxHeight } }],
-                { compress: quality / 100, format: ImageManipulator.SaveFormat.JPEG }
+                { compress: quality / 100, format: ImageManipulator.SaveFormat.JPEG },
             );
             return result.uri;
         } catch (error) {
@@ -226,7 +237,7 @@ const CandidateInfo = () => {
         }
     };
 
-    async function readFile(uri) {
+    async function readFile(uri: string) {
         try {
             const fileContent = await FileSystem.readAsStringAsync(uri, {
                 encoding: FileSystem.EncodingType.Base64, // You can choose the encoding as needed
@@ -248,11 +259,10 @@ const CandidateInfo = () => {
 
             const sendData = new FormData();
 
-
-            sendData.set('rollNo', hallticket?.ca_roll_number);
-            sendData.set('f_id', hallticket?.id);
-            sendData.set('r_id', hallticket?.ca_reg_id);
-            sendData.set('approved_by_user_id', `${currentLoggedInUserId}`);
+            sendData.set('rollNo', `${hallticket?.ca_roll_number ?? ''}`);
+            sendData.set('f_id', `${hallticket?.id ?? ''}`);
+            sendData.set('r_id', `${hallticket?.ca_reg_id ?? ''}`);
+            sendData.set('approved_by_user_id', `${currentLoggedInUserId ?? ''}`);
 
             const compressedPhotoUri = await compressImage(photoUri);
             const fileBase64 = (await readFile(compressedPhotoUri)) as string;
@@ -262,6 +272,7 @@ const CandidateInfo = () => {
             sendData.set('candidatePhoto', base64Data);
 
             let url = `${processData.p_form_filling_site}/api/save-approval-details`;
+             //let url = `http://192.168.1.9:5004/api/save-approval-detail`;
             const _resp = await fetch(url, {
                 method: 'POST',
                 body: sendData,
@@ -273,7 +284,7 @@ const CandidateInfo = () => {
             }
 
             setJustApproved(true);
-        } catch (err) {
+        } catch (err: any) {
             console.log(err, '-err==========');
             Alert.alert('Info', err?.message || 'Unable to approve candidate, try again later', [
                 {
@@ -293,9 +304,11 @@ const CandidateInfo = () => {
                 throw new Error('Invalid roll no');
             }
 
-            const url = `${authSlice.currentLoggedInProcessData.p_form_filling_site}/api/get-ht-details-by-roll-no?roll_no=${rollNumber}`;
-
-            const _resp = await fetch(url);
+        const url = `${authSlice.currentLoggedInProcessData.p_form_filling_site}/api/get-ht-details-by-roll-no?roll_no=${rollNumber}`;
+       
+       // const url=`http://192.168.1.9:5004/api/get-ht-details-by-roll-no?roll_no=${rollNumber}`;
+        //console.log(url,"final url:-[[[[[[[[[[[[[[[]]]]]]]]]]]]]]")
+        const _resp = await fetch(url);
             const jsonData = await _resp.json();
 
             if (!_resp.ok) {
@@ -311,8 +324,10 @@ const CandidateInfo = () => {
             } else {
                 setCandidateAllData(jsonData?.data || []);
             }
+
+            setCandidateAllData(jsonData?.data || []);
             setIsLoading(false);
-        } catch (error) {
+        } catch (error: any) {
             console.log(error, '=err=============');
             Alert.alert('Info', error?.message || 'No candidate found3', [
                 {
@@ -329,6 +344,11 @@ const CandidateInfo = () => {
     if (isLoading) {
         return <Loading />;
     }
+
+
+const photoUrl = `${s3BucketUrl}/${process?.[0]?.p_desc || process?.p_desc}/users/${hallticket?.ca_photo}`;
+
+ console.log('PHOTO URL:', photoUrl);
 
     return (
         <SafeAreaView
@@ -356,11 +376,11 @@ const CandidateInfo = () => {
                         <View style={styles.ticket}>
                             <View style={styles.photoAndSignContainer}>
                                 {/* User Photo */}
-
                                 <CandidateProfilePhoto
-                                    s3BucketUrl={s3BucketUrl}
+                                    s3BucketUrl={s3PhotoFolder}
                                     photo={hallticket?.ca_photo || ''}
                                 />
+
 
                                 <TouchableOpacity onPress={openCamera}>
                                     {/* Caputred image Image */}
@@ -368,13 +388,19 @@ const CandidateInfo = () => {
                                     {isCandidateApproved || isPictureTaken ? (
                                         <Image
                                             style={styles.photo}
+                                            // source={{
+                                            //     uri:
+                                            //         photoUri ||
+                                            //         `${hallticket?.ca_approved_photo_url}?time=${Date.now()}`,
+                                            // }}
+
                                             source={{
                                                 uri:
                                                     photoUri ||
                                                     `${
                                                         processData.p_form_filling_site
                                                     }/assets/images/qr-captures/${encodeURIComponent(
-                                                        hallticket?.ca_approved_photo
+                                                        hallticket?.ca_approved_photo ?? '',
                                                     )}?t=${Date.now()}`,
                                             }}
                                         />
@@ -398,7 +424,7 @@ const CandidateInfo = () => {
                             </View>
 
                             <CandidateSignature
-                                s3BucketUrl={s3BucketUrl}
+                                s3BucketUrl={`${s3BucketUrl}/${process?.[0]?.p_desc || process?.p_desc}/users/`}
                                 sign={hallticket?.ca_sign || ''}
                             />
 
@@ -439,6 +465,7 @@ const CandidateInfo = () => {
                                 <View
                                     style={{
                                         flexDirection: 'row',
+                                        flexWrap: 'wrap',
                                         gap: 5,
                                     }}>
                                     <Text
@@ -453,17 +480,7 @@ const CandidateInfo = () => {
                                         Department : {hallticket?.department || 'N/A'}
                                     </Text>
 
-                                    <Text
-                                        style={{
-                                            backgroundColor: '#009689',
-                                            padding: 8,
-                                            borderRadius: 5,
-                                            color: '#fff',
-                                            fontWeight: 500,
-                                            letterSpacing: 0.5,
-                                        }}>
-                                        Lab : {hallticket?.lab_name || 'N/A'}
-                                    </Text>
+
                                     <Text
                                         style={{
                                             backgroundColor: '#009689',
@@ -475,6 +492,19 @@ const CandidateInfo = () => {
                                         }}>
                                         Floor : {hallticket?.floor || 'N/A'}
                                     </Text>
+
+                                    <Text
+                                        style={{
+                                            backgroundColor: '#009689',
+                                            padding: 8,
+                                            borderRadius: 5,
+                                            color: '#fff',
+                                            fontWeight: 500,
+                                            letterSpacing: 0.5,
+                                        }}>
+                                        Lab/Room : {hallticket?.lab_name || 'N/A'}
+                                    </Text>
+                                
                                 </View>
                             </View>
                             <View style={styles.details}>
@@ -511,8 +541,8 @@ const CandidateInfo = () => {
                                     isApproving
                                         ? 'Approving...'
                                         : isCandidateApproved || justApproved
-                                        ? 'Present'
-                                        : 'Approve'
+                                          ? 'Present'
+                                          : 'Approve'
                                 }
                                 disabled={isApproving || isCandidateApproved || justApproved}
                                 onPress={handleApprove}
@@ -531,10 +561,10 @@ const CandidateInfo = () => {
     );
 };
 
-const DetailRow = ({ label, value }: { label: string; value: string | number }) => (
+const DetailRow = ({ label, value }: { label: string; value?: string | number }) => (
     <View style={styles.detailRow}>
         <Text style={styles.detailLabel}>{label}</Text>
-        <Text style={styles.detailValue}>{value}</Text>
+        <Text style={styles.detailValue}>{value ?? 'N/A'}</Text>
     </View>
 );
 
@@ -548,7 +578,7 @@ const CapturePhoto = ({
     isTakingPicture: boolean;
     isCameraOpen: boolean;
     cameraRef: any;
-    handleTakePicture: () => {};
+    handleTakePicture: () => void | Promise<void>;
     closeCamera: () => void;
 }) => {
     return (
